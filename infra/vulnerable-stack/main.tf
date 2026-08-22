@@ -55,26 +55,23 @@ resource "aws_security_group" "open_sg" {
   description = "INTENTIONALLY VULNERABLE - open SSH/MySQL to the internet"
   vpc_id      = data.aws_vpc.default.id
 
-  dynamic "ingress" {
-    for_each = var.ssh_open ? { ssh = 22 } : {}
-    content {
-      description = "SSH (toggle: ssh_open)"
-      from_port   = ingress.value
-      to_port     = ingress.value
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
+  # Rules always exist; remediation swaps the world CIDR for the VPC CIDR.
+  # (Keeping the blocks present is required: with zero inline ingress blocks the
+  # AWS provider treats ingress as externally managed and never revokes.)
+  ingress {
+    description = "SSH (toggle: ssh_open)"
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.ssh_open ? "0.0.0.0/0" : data.aws_vpc.default.cidr_block]
   }
 
-  dynamic "ingress" {
-    for_each = var.db_port_open ? { mysql = 3306 } : {}
-    content {
-      description = "MySQL (toggle: db_port_open)"
-      from_port   = ingress.value
-      to_port     = ingress.value
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-    }
+  ingress {
+    description = "MySQL (toggle: db_port_open)"
+    from_port   = 3306
+    to_port     = 3306
+    protocol    = "tcp"
+    cidr_blocks = [var.db_port_open ? "0.0.0.0/0" : data.aws_vpc.default.cidr_block]
   }
 
   egress {
