@@ -108,7 +108,25 @@ docker compose up --build
 **Expected:** monitor cycles inside the container; audit/ and infra/ mounted
 so state and trail persist.
 
-## 10. After testing — leave things safe
+## 10. Rogue-stack test — detection of unknown, externally-created resources
+
+Simulates the PRD problem statement: a developer applies a risky stack that
+Sentinel did not create.
+
+```bash
+cd infra/test-stack
+terraform init && terraform apply          # SG open on 22+3306, public S3 bucket
+```
+- With the monitor running: `[ALERT]` lines for `dev-quickfix-*` and
+  `dev-shared-dumps-*` within one cycle (~30s).
+- Audit shows `REMEDIATION_SKIPPED ... not managed by the demo stack` —
+  Sentinel detects everything but only auto-fixes resources it owns.
+- `terraform apply -var=create_test_db=true` additionally creates a public
+  RDS instance (~Rs 2/hr, ~5 min) for the AWS-RDS-PUBLIC finding.
+- Cleanup: `terraform destroy` in the same folder; findings disappear on the
+  next scan and the audit records them resolved externally.
+
+## 11. After testing — leave things safe
 
 ```bash
 python -m sentinel remediate --all     # or let the monitor finish its cycles
