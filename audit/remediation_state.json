@@ -1,7 +1,7 @@
 {
-  "ssh_open": true,
-  "db_port_open": true,
-  "db_publicly_accessible": true,
+  "ssh_open": false,
+  "db_port_open": false,
+  "db_publicly_accessible": false,
   "s3_encrypted": false,
-  "s3_public": true
+  "s3_public": false
 }

@@ -37,9 +37,10 @@ with every change reversible through a one-command **rollback**. A CI/CD gate
 - **Remediation** flips a security-posture Terraform variable and re-applies the
   stack, so fixes are idempotent (re-apply = no drift) and auditable.
 - **Rollback** re-applies the state snapshotted before a remediation.
-- **CI gate** runs `scan -> remediate -> re-scan` and exits non-zero when
-  remediation fails, blocking the deployment (see
-  [`.github/workflows/sentinel-gate.yml`](.github/workflows/sentinel-gate.yml)).
+- **CI gate** (`ci-scan`) scans live cloud state and exits non-zero to block
+  the deployment. CI runners use `--gate-only` (no Terraform state there);
+  locally the gate also remediates and re-verifies. A blind or unhealthy
+  provider fails the gate — a scan that cannot see never passes.
 
 ## Quickstart
 
