@@ -88,13 +88,16 @@ python -m sentinel remediate --all --dry-run
 **Expected:** prints the exact `terraform apply -var=...` commands without
 executing them.
 
-## 8. Dashboard (bonus)
+## 8. Dashboard / Control Center (bonus + full UI demo)
 
 ```bash
-python -m sentinel dashboard     # http://127.0.0.1:8080
+python -m sentinel dashboard     # open http://127.0.0.1:8080
 ```
-**Expected:** provider×severity heatmap, live findings, audit feed,
-auto-refresh every 5s.
+**Expected:** provider×severity heatmap, live findings, audit feed, and
+**action buttons** that run the same CLI commands (Scan now, Plant
+misconfigurations, Remediate all, Rollback last fix, Run CI gate check) with
+output streamed to an on-page console. The entire demo can be driven from
+this one page.
 
 ## 9. Container (cloud-native packaging)
 

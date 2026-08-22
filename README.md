@@ -37,6 +37,10 @@ with every change reversible through a one-command **rollback**. A CI/CD gate
 - **Remediation** flips a security-posture Terraform variable and re-applies the
   stack, so fixes are idempotent (re-apply = no drift) and auditable.
 - **Rollback** re-applies the state snapshotted before a remediation.
+- **Control-center dashboard** (`python -m sentinel dashboard`): risk heatmap,
+  live findings, audit trail — plus buttons that drive the full workflow
+  (scan, plant misconfigurations, remediate, rollback, CI gate) with streamed
+  output, so the whole demo runs from one page.
 - **CI gate** (`ci-scan`) scans live cloud state and exits non-zero to block
   the deployment. CI runners use `--gate-only` (no Terraform state there);
   locally the gate also remediates and re-verifies. A blind or unhealthy
