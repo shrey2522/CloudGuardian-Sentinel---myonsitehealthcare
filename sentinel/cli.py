@@ -195,6 +195,13 @@ def cmd_ci_scan(args):
     sys.exit(0)
 
 
+def cmd_dashboard(args):
+    import uvicorn
+    from sentinel.dashboard import app
+    print(f"dashboard on http://{args.host}:{args.port} (auto-refresh 5s)")
+    uvicorn.run(app, host=args.host, port=args.port, log_level="warning")
+
+
 def main():
     parser = argparse.ArgumentParser(prog="sentinel",
                                      description="CloudGuardian Sentinel - IaC/cloud security monitor")
@@ -232,6 +239,11 @@ def main():
     p_ci = sub.add_parser("ci-scan", help="CI/CD gate - exit 1 when remediation fails")
     p_ci.add_argument("--fail-on", choices=["actionable", "any"], default="actionable")
     p_ci.set_defaults(func=cmd_ci_scan)
+
+    p_dash = sub.add_parser("dashboard", help="risk heatmap dashboard (bonus)")
+    p_dash.add_argument("--host", default="127.0.0.1")
+    p_dash.add_argument("--port", type=int, default=8080)
+    p_dash.set_defaults(func=cmd_dashboard)
 
     args = parser.parse_args()
     args.func(args)
