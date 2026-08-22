@@ -67,8 +67,8 @@ class Monitor:
             else:
                 rec = store[f.fingerprint]
                 rec["last_seen"] = now
-                if rec.get("status") in ("REMEDIATED", "RESOLVED_EXTERNAL"):
-                    # regression: a previously fixed misconfiguration is back
+                if rec.get("status") in ("REMEDIATED", "RESOLVED_EXTERNAL", "MANUAL"):
+                    # regression: a previously fixed/flagged misconfiguration is back
                     rec["status"] = "OPEN"
                     rec["regressed_at"] = now
                     new_findings.append(f)
@@ -91,7 +91,7 @@ class Monitor:
                                   f"{rec.get('rule_id')} on {rec.get('resource_id')} confirmed "
                                   f"clean (detect->clean {sla}s)", rule_id=rec.get("rule_id"),
                                   resource_id=rec.get("resource_id"), sla_s=sla)
-            elif rec.get("status") == "OPEN":
+            elif rec.get("status") in ("OPEN", "MANUAL"):
                 rec["status"] = "RESOLVED_EXTERNAL"
                 rec["resolved_at"] = now
                 self.audit.record("RESOLVED_EXTERNAL",
@@ -135,6 +135,10 @@ class Monitor:
                     store[f.fingerprint]["remediation_started_at"] = now
                 elif result.status == "FAILED":
                     store[f.fingerprint]["status"] = "REMEDIATION_FAILED"
+                elif result.status == "SKIPPED":
+                    # not owned by the Sentinel stack: one flag, then stop
+                    # retrying - a human must remediate these manually
+                    store[f.fingerprint]["status"] = "MANUAL"
 
         self.save_store(store)
         elapsed = time.monotonic() - t0

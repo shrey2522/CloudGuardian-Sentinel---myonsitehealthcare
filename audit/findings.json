@@ -14,7 +14,7 @@
     "status": "OPEN",
     "fingerprint": "GCP-FW-SSH-OPEN:gcp:default-allow-rdp",
     "first_seen": "2026-08-22T11:17:45+00:00",
-    "last_seen": "2026-08-22T12:08:35+00:00"
+    "last_seen": "2026-08-22T12:52:35+00:00"
   },
   "GCP-FW-SSH-OPEN:gcp:default-allow-ssh": {
     "rule_id": "GCP-FW-SSH-OPEN",
@@ -31,7 +31,7 @@
     "status": "OPEN",
     "fingerprint": "GCP-FW-SSH-OPEN:gcp:default-allow-ssh",
     "first_seen": "2026-08-22T11:17:45+00:00",
-    "last_seen": "2026-08-22T12:08:35+00:00"
+    "last_seen": "2026-08-22T12:52:35+00:00"
   },
   "AWS-RDS-UNENCRYPTED:aws:cg-demo-public-db": {
     "rule_id": "AWS-RDS-UNENCRYPTED",
@@ -48,7 +48,7 @@
     "status": "OPEN",
     "fingerprint": "AWS-RDS-UNENCRYPTED:aws:cg-demo-public-db",
     "first_seen": "2026-08-22T11:17:45+00:00",
-    "last_seen": "2026-08-22T12:08:35+00:00"
+    "last_seen": "2026-08-22T12:52:35+00:00"
   },
   "AWS-SG-SSH-OPEN:aws:sg-0ec1c79b88debbbad": {
     "rule_id": "AWS-SG-SSH-OPEN",
@@ -133,5 +133,56 @@
     "remediated_at": "2026-08-22T12:00:46+00:00",
     "sla_s": 2430.0,
     "regressed_at": "2026-08-22T11:58:10+00:00"
+  },
+  "AWS-S3-PUBLIC-READ:aws:dev-shared-dumps-828ad7c9": {
+    "rule_id": "AWS-S3-PUBLIC-READ",
+    "severity": "CRITICAL",
+    "title": "S3 bucket allows public read access",
+    "provider": "aws",
+    "resource_type": "aws_s3_bucket",
+    "resource_id": "dev-shared-dumps-828ad7c9",
+    "region": "us-east-1",
+    "details": "policy_public=True, blocked=False",
+    "detected_at": "2026-08-22T12:47:47+00:00",
+    "remediation_action": "block_s3_public",
+    "auto_remediation": true,
+    "status": "MANUAL",
+    "fingerprint": "AWS-S3-PUBLIC-READ:aws:dev-shared-dumps-828ad7c9",
+    "first_seen": "2026-08-22T12:47:47+00:00",
+    "last_seen": "2026-08-22T12:52:35+00:00"
+  },
+  "AWS-SG-SSH-OPEN:aws:sg-0d4d8274aa02bf2ee": {
+    "rule_id": "AWS-SG-SSH-OPEN",
+    "severity": "CRITICAL",
+    "title": "Security group exposes SSH (22) to the entire internet",
+    "provider": "aws",
+    "resource_type": "aws_security_group",
+    "resource_id": "sg-0d4d8274aa02bf2ee",
+    "region": "us-east-1",
+    "details": "port 22-22 from ['0.0.0.0/0']",
+    "detected_at": "2026-08-22T12:48:17+00:00",
+    "remediation_action": "close_ssh_ingress",
+    "auto_remediation": true,
+    "status": "MANUAL",
+    "fingerprint": "AWS-SG-SSH-OPEN:aws:sg-0d4d8274aa02bf2ee",
+    "first_seen": "2026-08-22T12:48:17+00:00",
+    "last_seen": "2026-08-22T12:52:35+00:00"
+  },
+  "AWS-SG-DB-PORTS-OPEN:aws:sg-0d4d8274aa02bf2ee": {
+    "rule_id": "AWS-SG-DB-PORTS-OPEN",
+    "severity": "CRITICAL",
+    "title": "Security group exposes database ports to the entire internet",
+    "provider": "aws",
+    "resource_type": "aws_security_group",
+    "resource_id": "sg-0d4d8274aa02bf2ee",
+    "region": "us-east-1",
+    "details": "port 3306-3306 from ['0.0.0.0/0']",
+    "detected_at": "2026-08-22T12:48:17+00:00",
+    "remediation_action": "close_db_ingress",
+    "auto_remediation": true,
+    "status": "MANUAL",
+    "fingerprint": "AWS-SG-DB-PORTS-OPEN:aws:sg-0d4d8274aa02bf2ee",
+    "first_seen": "2026-08-22T12:48:17+00:00",
+    "last_seen": "2026-08-22T12:52:35+00:00"
   }
 }
