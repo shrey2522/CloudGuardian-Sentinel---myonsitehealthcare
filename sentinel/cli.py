@@ -194,9 +194,15 @@ def cmd_ci_scan(args):
     print_findings(findings)
 
     if args.gate_only:
+        blocking = [f for f in findings if f.remediation_action or args.fail_on == "any"]
+        if not blocking:
+            audit.record("CI_PASS", "deployment allowed - only detection-only advisories open",
+                         advisories=[f.to_dict() for f in findings])
+            print(f"CI-PASS: {len(findings)} detection-only advisories (no gate-blocking rules)")
+            sys.exit(0)
         audit.record("CI_BLOCK", "deployment BLOCKED - open findings (gate-only mode)",
-                     remaining=[f.to_dict() for f in findings])
-        print(f"CI-BLOCK: deployment blocked - {len(findings)} open finding(s). "
+                     remaining=[f.to_dict() for f in blocking])
+        print(f"CI-BLOCK: deployment blocked - {len(blocking)} open actionable finding(s). "
               "Remediate via the Sentinel monitor and re-run.")
         sys.exit(1)
 
