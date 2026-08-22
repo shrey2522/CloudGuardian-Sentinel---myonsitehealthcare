@@ -1,14 +1,16 @@
 ##############################################################################
-# CloudGuardian Sentinel - INTENTIONALLY VULNERABLE DEMO STACK
+# CloudGuardian Sentinel - DEMO STACK (variable-driven)
 #
-# This stack deliberately deploys misconfigured resources so the Sentinel
-# monitor has something to detect and remediate. NEVER use in production.
+# Deploys resources whose security posture is controlled by variables so the
+# Sentinel remediator can converge them to a safe state via:
+#     terraform apply -var <toggle>=<safe-value>
+# and roll back by re-applying the previously recorded values.
 #
-# Misconfigurations planted:
+# Defaults deploy the INTENTIONALLY VULNERABLE state:
 #   1. Security group open to 0.0.0.0/0 on SSH (22) and MySQL (3306)
-#   2. RDS MySQL instance marked publicly_accessible = true  (+ storage unencrypted)
+#   2. RDS MySQL publicly_accessible = true (and unencrypted storage)
 #   3. S3 bucket with no server-side encryption
-#   4. S3 bucket with public-read bucket policy and public access block disabled
+#   4. S3 bucket public-read policy with public access block disabled
 ##############################################################################
 
 terraform {
@@ -47,26 +49,32 @@ locals {
   }
 }
 
-# --- MISCONFIG 1: security group wide open on SSH + MySQL ------------------
+# --- MISCONFIG 1: security group, dangerous ports gated by variables --------
 resource "aws_security_group" "open_sg" {
   name        = "cg-demo-open-${random_id.suffix.hex}"
   description = "INTENTIONALLY VULNERABLE - open SSH/MySQL to the internet"
   vpc_id      = data.aws_vpc.default.id
 
-  ingress {
-    description = "SSH open to world"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+  dynamic "ingress" {
+    for_each = var.ssh_open ? { ssh = 22 } : {}
+    content {
+      description = "SSH (toggle: ssh_open)"
+      from_port   = ingress.value
+      to_port     = ingress.value
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
   }
 
-  ingress {
-    description = "MySQL open to world"
-    from_port   = 3306
-    to_port     = 3306
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+  dynamic "ingress" {
+    for_each = var.db_port_open ? { mysql = 3306 } : {}
+    content {
+      description = "MySQL (toggle: db_port_open)"
+      from_port   = ingress.value
+      to_port     = ingress.value
+      protocol    = "tcp"
+      cidr_blocks = ["0.0.0.0/0"]
+    }
   }
 
   egress {
@@ -79,7 +87,7 @@ resource "aws_security_group" "open_sg" {
   tags = local.tags
 }
 
-# --- MISCONFIG 2: publicly accessible (and unencrypted) RDS instance -------
+# --- MISCONFIG 2: RDS instance, public access gated by variable -------------
 resource "aws_db_subnet_group" "demo" {
   name       = "cg-demo-db-subnet-${random_id.suffix.hex}"
   subnet_ids = data.aws_subnets.default.ids
@@ -96,7 +104,7 @@ resource "aws_db_instance" "public_db" {
   db_name                = "demodb"
   username               = "sentinel"
   password               = var.db_password
-  publicly_accessible    = true
+  publicly_accessible    = var.db_publicly_accessible
   db_subnet_group_name   = aws_db_subnet_group.demo.name
   vpc_security_group_ids = [aws_security_group.open_sg.id]
   multi_az               = false
@@ -106,13 +114,24 @@ resource "aws_db_instance" "public_db" {
   tags                   = local.tags
 }
 
-# --- MISCONFIG 3: S3 bucket without server-side encryption ------------------
+# --- MISCONFIG 3: S3 bucket, encryption gated by variable --------------------
 resource "aws_s3_bucket" "unencrypted" {
   bucket = "cg-demo-unencrypted-${random_id.suffix.hex}"
   tags   = local.tags
 }
 
-# --- MISCONFIG 4: publicly readable S3 bucket -------------------------------
+resource "aws_s3_bucket_server_side_encryption_configuration" "encryption" {
+  count  = var.s3_encrypted ? 1 : 0
+  bucket = aws_s3_bucket.unencrypted.id
+
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
+    }
+  }
+}
+
+# --- MISCONFIG 4: public S3 bucket, public access gated by variable ----------
 resource "aws_s3_bucket" "public" {
   bucket = "cg-demo-public-${random_id.suffix.hex}"
   tags   = local.tags
@@ -120,13 +139,14 @@ resource "aws_s3_bucket" "public" {
 
 resource "aws_s3_bucket_public_access_block" "public_off" {
   bucket                  = aws_s3_bucket.public.id
-  block_public_acls       = false
-  block_public_policy     = false
-  ignore_public_acls      = false
-  restrict_public_buckets = false
+  block_public_acls       = var.s3_public ? false : true
+  block_public_policy     = var.s3_public ? false : true
+  ignore_public_acls      = var.s3_public ? false : true
+  restrict_public_buckets = var.s3_public ? false : true
 }
 
 resource "aws_s3_bucket_policy" "public_read" {
+  count  = var.s3_public ? 1 : 0
   bucket = aws_s3_bucket.public.id
   depends_on = [aws_s3_bucket_public_access_block.public_off]
 

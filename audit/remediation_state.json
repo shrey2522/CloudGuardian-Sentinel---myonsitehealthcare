@@ -1,0 +1,7 @@
+{
+  "ssh_open": true,
+  "db_port_open": true,
+  "db_publicly_accessible": true,
+  "s3_encrypted": false,
+  "s3_public": true
+}

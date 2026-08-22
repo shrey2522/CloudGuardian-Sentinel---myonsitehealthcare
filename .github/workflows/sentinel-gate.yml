@@ -1,0 +1,43 @@
+name: sentinel-security-gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  security-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Sentinel
+        run: pip install -r requirements.txt
+
+      - name: Terraform fmt + validate (IaC template checks)
+        run: |
+          cd infra/vulnerable-stack
+          terraform fmt -check -recursive
+          terraform init -backend=false -input=false
+          terraform validate
+
+      - name: Sentinel gate - scan, auto-remediate, re-scan (blocks deploy on failure)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
+          SENTINEL_ACTOR: ${{ github.actor }}
+        run: python -m sentinel ci-scan
+
+      - name: Upload audit trail artifact (24h+ retention)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentinel-audit-trail
+          path: audit/
+          retention-days: 7

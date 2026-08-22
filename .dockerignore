@@ -1,0 +1,7 @@
+.git
+.terraform
+audit
+secrets
+__pycache__
+*.pyc
+*.tfstate*

@@ -1,0 +1,104 @@
+# CloudGuardian Sentinel - detection rule definitions
+#
+# Rules are pure YAML: severity, ports, thresholds and remediation actions
+# are all configurable here without touching engine code.
+#
+# detection.type selects an evaluator implemented in rule_engine.py;
+# the remaining detection keys are parameters for that evaluator.
+
+rules:
+  # ---------------- AWS ----------------
+  - id: AWS-SG-SSH-OPEN
+    title: Security group exposes SSH (22) to the entire internet
+    provider: aws
+    resource_type: aws_security_group
+    severity: CRITICAL
+    detection:
+      type: open_ingress
+      ports: [22, 3389]
+    remediation:
+      action: close_ssh_ingress
+      auto: true
+
+  - id: AWS-SG-DB-PORTS-OPEN
+    title: Security group exposes database ports to the entire internet
+    provider: aws
+    resource_type: aws_security_group
+    severity: CRITICAL
+    detection:
+      type: open_ingress
+      ports: [3306, 5432, 27017, 1433, 1521, 6379]
+    remediation:
+      action: close_db_ingress
+      auto: true
+
+  - id: AWS-RDS-PUBLIC
+    title: RDS database instance is publicly accessible
+    provider: aws
+    resource_type: aws_rds_instance
+    severity: CRITICAL
+    detection:
+      type: attribute_flag
+      attribute: publicly_accessible
+      equals: true
+    remediation:
+      action: disable_rds_public
+      auto: true
+
+  - id: AWS-RDS-UNENCRYPTED
+    title: RDS storage is not encrypted at rest
+    provider: aws
+    resource_type: aws_rds_instance
+    severity: HIGH
+    detection:
+      type: attribute_flag
+      attribute: storage_encrypted
+      equals: false
+    remediation:
+      action: ""          # requires instance recreate - detection only in MVP
+
+  - id: AWS-S3-NO-ENCRYPTION
+    title: S3 bucket has no server-side encryption
+    provider: aws
+    resource_type: aws_s3_bucket
+    severity: HIGH
+    detection:
+      type: attribute_flag
+      attribute: encrypted
+      equals: false
+    remediation:
+      action: enable_s3_encryption
+      auto: true
+
+  - id: AWS-S3-PUBLIC-READ
+    title: S3 bucket allows public read access
+    provider: aws
+    resource_type: aws_s3_bucket
+    severity: CRITICAL
+    detection:
+      type: s3_public_read
+    remediation:
+      action: block_s3_public
+      auto: true
+
+  # ---------------- GCP ----------------
+  - id: GCP-FW-SSH-OPEN
+    title: Firewall rule allows SSH from 0.0.0.0/0
+    provider: gcp
+    resource_type: gcp_firewall
+    severity: CRITICAL
+    detection:
+      type: gcp_firewall_open
+      ports: [22, 3389]
+    remediation:
+      action: ""          # GCP remediation is out of MVP scope (detection-only)
+
+  - id: GCP-GCS-PUBLIC
+    title: GCS bucket is readable by allUsers
+    provider: gcp
+    resource_type: gcs_bucket
+    severity: HIGH
+    detection:
+      type: gcp_bucket_public
+    remediation:
+      action: ""

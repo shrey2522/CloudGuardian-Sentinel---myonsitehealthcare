@@ -1,0 +1,25 @@
+services:
+  sentinel:
+    build: .
+    environment:
+      # AWS auth passed through for the provider + terraform
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-us-east-1}
+      # GCP auth via mounted service-account key
+      GCP_PROJECT: ${GCP_PROJECT}
+      GCP_KEY_FILE: /run/secrets/gcp-key.json
+      SENTINEL_POLL_INTERVAL: "30"
+      SENTINEL_AUTO_REMEDIATE: "true"
+      SENTINEL_ACTOR: sentinel-container
+    volumes:
+      - ./infra:/app/infra            # terraform stack + live state
+      - ./audit:/app/audit            # audit trail + snapshots survive restarts
+    secrets:
+      - source: gcp-key
+        target: gcp-key.json
+    restart: unless-stopped
+
+secrets:
+  gcp-key:
+    file: ./secrets/gcp-key.json
