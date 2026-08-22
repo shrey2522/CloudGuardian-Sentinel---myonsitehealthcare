@@ -159,8 +159,10 @@ class Monitor:
             for name, status in summary.get("providers", {}).items():
                 if not status.get("healthy", False):
                     print(f"[PROVIDER:{name}] unhealthy: {status}")
-            print(f"[cycle {cycle_no}] new={summary.get('new')} open={summary.get('open')} "
-                  f"took={summary.get('elapsed_s')}s")
+            from datetime import datetime
+            stamp = datetime.now().strftime("%H:%M:%S")
+            print(f"[{stamp}] [cycle {cycle_no}] new={summary.get('new')} "
+                  f"open={summary.get('open')} took={summary.get('elapsed_s')}s")
             time.sleep(max(0, self.settings.poll_interval - summary.get("elapsed_s", 0)))
 
     @staticmethod
