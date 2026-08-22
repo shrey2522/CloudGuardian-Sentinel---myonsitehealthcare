@@ -42,7 +42,7 @@ def eval_s3_public_read(attrs, params):
 
 
 def eval_gcp_firewall_open(attrs, params):
-    ports = set(params.get("ports", []))
+    ports = {str(p) for p in params.get("ports", [])}   # GCP API returns ports as strings
     hits = []
     if attrs.get("direction", "INGRESS").upper() != "INGRESS":
         return False, "egress rule"
@@ -50,7 +50,7 @@ def eval_gcp_firewall_open(attrs, params):
         return False, "restricted source ranges"
     for allowed in attrs.get("allowed", []):
         proto = (allowed.get("protocol") or "").lower()
-        rule_ports = allowed.get("ports") or []
+        rule_ports = [str(p) for p in (allowed.get("ports") or [])]
         if proto in ("tcp", "all") and (proto == "all" or not rule_ports
                                         or set(rule_ports) & ports):
             hits.append(f"{proto}:{rule_ports or 'all'}")

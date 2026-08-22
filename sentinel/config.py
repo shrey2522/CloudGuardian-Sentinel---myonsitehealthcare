@@ -28,6 +28,12 @@ class Settings:
     gcp_project = _env("GCP_PROJECT", "")
     gcp_key_path = Path(_env("GCP_KEY_FILE", BASE_DIR / "secrets" / "gcp-key.json"))
 
+    def __init__(self):
+        if not self.gcp_project:
+            project_file = self.base_dir / "secrets" / "gcp_project"
+            if project_file.exists():
+                object.__setattr__(self, "gcp_project", project_file.read_text(encoding="utf-8").strip())
+
     # identity for audit "user context"
     actor = _env("SENTINEL_ACTOR", os.environ.get("GITHUB_ACTOR") or os.environ.get("USERNAME") or "unknown")
 
