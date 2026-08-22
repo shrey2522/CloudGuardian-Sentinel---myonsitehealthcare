@@ -156,7 +156,7 @@ PAGE = """<!doctype html>
   <div class="grid" id="heatmap"></div>
   <h2 style="margin-top:18px">Open findings</h2>
   <table id="findings"><thead><tr>
-   <th>Severity</th><th>Rule</th><th>Resource</th><th>Status</th></tr></thead>
+   <th>Severity</th><th>Rule</th><th>Resource</th><th>Remediation</th><th>Status</th></tr></thead>
    <tbody></tbody></table>
   <h2 style="margin-top:18px">Audit trail</h2>
   <table id="audit"><thead><tr>
@@ -226,7 +226,8 @@ async function tick(){
     document.querySelector('#findings tbody').innerHTML=d.findings.map(f=>
      `<tr><td><span class="badge ${esc(f.severity)}">${esc(f.severity)}</span></td>
       <td>${esc(f.rule_id)}</td><td>${esc(f.resource_id)}<br><span class="ts">${esc(f.provider)} &middot; ${esc(f.region)}</span></td>
-      <td>${esc(f.status)}</td></tr>`).join('')||'<tr><td colspan="4" class="dim">clean</td></tr>';
+      <td>${f.remediation_action?`<span class="ok">auto: ${esc(f.remediation_action)}</span>`:'<span class="dim">detection-only</span>'}</td>
+      <td>${esc(f.status)}</td></tr>`).join('')||'<tr><td colspan="5" class="dim">clean</td></tr>';
     document.querySelector('#audit tbody').innerHTML=d.audit.map(e=>
      `<tr><td class="ts">${esc(e.ts)}</td><td>${esc(e.event_type)}</td>
       <td class="ts">${esc(e.actor)}</td><td>${esc(e.message)}</td></tr>`).join('');

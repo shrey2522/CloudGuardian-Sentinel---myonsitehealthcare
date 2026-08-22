@@ -112,7 +112,15 @@ def cmd_remediate(args):
     findings, _ = monitor.scan_once()
     targets = select_findings(findings, args)
     if not targets:
-        print("no matching findings to remediate")
+        print("no auto-remediable findings matching your selection.")
+        detection_only = [f for f in findings if not f.remediation_action]
+        if detection_only:
+            print(f"{len(detection_only)} finding(s) are detection-only "
+                  "(no automated remediation defined; manual action required):")
+            for f in detection_only:
+                print(f"  - {f.rule_id} on {f.resource_id}: {f.title}")
+            print("by design: GCP rules are detection-only in the MVP, and RDS storage")
+            print("encryption requires an instance rebuild (destroy + recreate).")
         return
     exit_code = 0
     for f in targets:
