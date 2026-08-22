@@ -164,18 +164,43 @@ def cmd_demo_setup(args):
 
 
 def cmd_ci_scan(args):
-    """CI/CD gate: block the deployment when remediation fails or leaves risks open."""
+    """CI/CD gate: block the deployment when risks are open or the scan cannot verify.
+
+    --gate-only: pure detection gate for environments without the Terraform
+    state (e.g. CI runners) - remediation is left to the state-owning monitor.
+    Default: scan, remediate, re-scan and block if remediation failed.
+    """
     providers, engine, audit, remediator = build_components()
     monitor = Monitor(providers, engine, audit, remediator, settings)
-    findings, _ = monitor.scan_once()
+    findings, statuses = monitor.scan_once()
+
+    # A scan that cannot see the cloud must never pass the gate.
+    aws_status = statuses.get("aws", {})
+    if not aws_status.get("healthy", False) or aws_status.get("resources", 0) == 0:
+        audit.record("CI_BLOCK", "AWS provider unhealthy or blind - cannot verify security "
+                    "posture (check AWS credentials)", provider_status=aws_status)
+        print(f"CI-BLOCK: AWS provider unhealthy or collected 0 resources: {aws_status}")
+        sys.exit(1)
+    gcp_status = statuses.get("gcp", {})
+    if "reason" not in gcp_status and not gcp_status.get("healthy", False):
+        print(f"CI-WARN: GCP provider error: {gcp_status}", file=sys.stderr)
+
     audit.record("CI_SCAN", f"CI gate scan: {len(findings)} finding(s)",
                  findings=[f.to_dict() for f in findings])
-    actionable = [f for f in findings if f.remediation_action]
     if not findings:
         audit.record("CI_PASS", "no misconfigurations - deployment allowed")
         print("CI-PASS: no misconfigurations detected")
         sys.exit(0)
     print_findings(findings)
+
+    if args.gate_only:
+        audit.record("CI_BLOCK", "deployment BLOCKED - open findings (gate-only mode)",
+                     remaining=[f.to_dict() for f in findings])
+        print(f"CI-BLOCK: deployment blocked - {len(findings)} open finding(s). "
+              "Remediate via the Sentinel monitor and re-run.")
+        sys.exit(1)
+
+    actionable = [f for f in findings if f.remediation_action]
     failures = []
     for f in actionable:
         result = remediator.remediate(f)
@@ -238,6 +263,8 @@ def main():
 
     p_ci = sub.add_parser("ci-scan", help="CI/CD gate - exit 1 when remediation fails")
     p_ci.add_argument("--fail-on", choices=["actionable", "any"], default="actionable")
+    p_ci.add_argument("--gate-only", action="store_true",
+                      help="detection-only gate (CI runners without Terraform state)")
     p_ci.set_defaults(func=cmd_ci_scan)
 
     p_dash = sub.add_parser("dashboard", help="risk heatmap dashboard (bonus)")

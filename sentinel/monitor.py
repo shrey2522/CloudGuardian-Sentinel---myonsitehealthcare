@@ -39,13 +39,13 @@ class Monitor:
         resources, statuses = [], {}
         with ThreadPoolExecutor(max_workers=self.settings.max_workers) as ex:
             futures = {ex.submit(p.collect): p for p in self.providers}
-            for fut, provider in futures.items():
-                try:
-                    res, status = fut.result(timeout=180)
-                except Exception as exc:
-                    res, status = [], {"healthy": False, "errors": [str(exc)]}
-                resources.extend(res)
-                statuses[provider.name] = status
+        for fut, provider in futures.items():
+            try:
+                res, status = fut.result(timeout=180)
+            except Exception as exc:
+                res, status = [], {"healthy": False, "errors": [str(exc)]}
+            resources.extend(res)
+            statuses[provider.name] = {**status, "resources": len(res)}
         findings = self.engine.evaluate(resources)
         findings.sort(key=lambda f: SEVERITY_ORDER.get(f.severity, 99))
         return findings, statuses
