@@ -97,16 +97,31 @@ class Monitor:
                               remediation_action=f.remediation_action)
             print(f"[ALERT] {f.severity} {f.rule_id} {f.resource_id} - {f.title}")
 
-        # auto-remediation
+        # auto-remediation: new findings plus retries for anything still open
         if self.settings.auto_remediate:
-            for f in new_findings:
+            new_fps = {f.fingerprint for f in new_findings}
+            now = utcnow()
+            retry_targets = []
+            for f in findings:
+                if f.fingerprint in new_fps or not (f.auto_remediation and f.remediation_action):
+                    continue
+                rec = store.get(f.fingerprint) or {}
+                status = rec.get("status")
+                if status in ("OPEN", "REMEDIATION_FAILED"):
+                    retry_targets.append(f)
+                elif status == "REMEDIATING" and self._seconds_between(
+                        rec.get("remediation_started_at") or rec.get("last_seen", now), now) > 120:
+                    retry_targets.append(f)   # convergence stalled - re-apply
+            for f in new_findings + retry_targets:
                 if not (f.auto_remediation and f.remediation_action):
                     continue
+                tag = "REMEDIATE" if f.fingerprint in new_fps else "RETRY"
                 result = self.remediator.remediate(f)
-                print(f"[REMEDIATE] {f.rule_id} on {f.resource_id}: {result.status} "
+                print(f"[{tag}] {f.rule_id} on {f.resource_id}: {result.status} "
                       f"({result.message})")
                 if result.status == "SUCCESS":
                     store[f.fingerprint]["status"] = "REMEDIATING"
+                    store[f.fingerprint]["remediation_started_at"] = now
                 elif result.status == "FAILED":
                     store[f.fingerprint]["status"] = "REMEDIATION_FAILED"
 

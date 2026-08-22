@@ -72,6 +72,12 @@ class Remediator:
     def stack_outputs(self):
         proc = self._run(["terraform", "output", "-json"], check=False)
         if proc.returncode != 0:
+            # transient failures happen when another terraform command holds the
+            # state lock - one retry before giving up
+            import time as _t
+            _t.sleep(2)
+            proc = self._run(["terraform", "output", "-json"], check=False)
+        if proc.returncode != 0:
             return {}
         try:
             return {k: v.get("value") for k, v in json.loads(proc.stdout).items()}
