@@ -65,7 +65,18 @@ class Monitor:
                 store[f.fingerprint] = {**f.to_dict(),
                                         "first_seen": now, "last_seen": now, "status": "OPEN"}
             else:
-                store[f.fingerprint]["last_seen"] = now
+                rec = store[f.fingerprint]
+                rec["last_seen"] = now
+                if rec.get("status") in ("REMEDIATED", "RESOLVED_EXTERNAL"):
+                    # regression: a previously fixed misconfiguration is back
+                    rec["status"] = "OPEN"
+                    rec["regressed_at"] = now
+                    new_findings.append(f)
+                    self.audit.record("REGRESSION",
+                                      f"{f.rule_id} on {f.resource_id} has REAPPEARED after "
+                                      "being remediated - re-alerting and re-remediating",
+                                      rule_id=f.rule_id, resource_id=f.resource_id,
+                                      severity=f.severity)
 
         # resources that disappeared => remediation verified or externally fixed
         for fpr, rec in list(store.items()):

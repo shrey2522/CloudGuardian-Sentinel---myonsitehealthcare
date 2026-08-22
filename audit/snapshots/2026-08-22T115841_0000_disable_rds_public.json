@@ -1,0 +1,27 @@
+{
+  "snapshot_id": "2026-08-22T115841_0000_disable_rds_public",
+  "action": "disable_rds_public",
+  "previous_state": {
+    "ssh_open": false,
+    "db_port_open": false,
+    "db_publicly_accessible": true,
+    "s3_encrypted": false,
+    "s3_public": true
+  },
+  "finding": {
+    "rule_id": "AWS-RDS-PUBLIC",
+    "severity": "CRITICAL",
+    "title": "RDS database instance is publicly accessible",
+    "provider": "aws",
+    "resource_type": "aws_rds_instance",
+    "resource_id": "cg-demo-public-db",
+    "region": "us-east-1",
+    "details": "publicly_accessible=True (expected True)",
+    "detected_at": "2026-08-22T11:58:10+00:00",
+    "remediation_action": "disable_rds_public",
+    "auto_remediation": true,
+    "status": "OPEN",
+    "fingerprint": "AWS-RDS-PUBLIC:aws:cg-demo-public-db"
+  },
+  "created_at": "2026-08-22T11:58:41+00:00"
+}

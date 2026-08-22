@@ -14,7 +14,7 @@
     "status": "OPEN",
     "fingerprint": "GCP-FW-SSH-OPEN:gcp:default-allow-rdp",
     "first_seen": "2026-08-22T11:17:45+00:00",
-    "last_seen": "2026-08-22T11:33:34+00:00"
+    "last_seen": "2026-08-22T12:00:46+00:00"
   },
   "GCP-FW-SSH-OPEN:gcp:default-allow-ssh": {
     "rule_id": "GCP-FW-SSH-OPEN",
@@ -31,7 +31,7 @@
     "status": "OPEN",
     "fingerprint": "GCP-FW-SSH-OPEN:gcp:default-allow-ssh",
     "first_seen": "2026-08-22T11:17:45+00:00",
-    "last_seen": "2026-08-22T11:33:34+00:00"
+    "last_seen": "2026-08-22T12:00:46+00:00"
   },
   "AWS-RDS-UNENCRYPTED:aws:cg-demo-public-db": {
     "rule_id": "AWS-RDS-UNENCRYPTED",
@@ -48,7 +48,7 @@
     "status": "OPEN",
     "fingerprint": "AWS-RDS-UNENCRYPTED:aws:cg-demo-public-db",
     "first_seen": "2026-08-22T11:17:45+00:00",
-    "last_seen": "2026-08-22T11:33:34+00:00"
+    "last_seen": "2026-08-22T12:00:46+00:00"
   },
   "AWS-SG-SSH-OPEN:aws:sg-0ec1c79b88debbbad": {
     "rule_id": "AWS-SG-SSH-OPEN",
@@ -65,10 +65,11 @@
     "status": "REMEDIATED",
     "fingerprint": "AWS-SG-SSH-OPEN:aws:sg-0ec1c79b88debbbad",
     "first_seen": "2026-08-22T11:19:29+00:00",
-    "last_seen": "2026-08-22T11:26:24+00:00",
-    "remediation_started_at": "2026-08-22T11:26:24+00:00",
-    "remediated_at": "2026-08-22T11:28:54+00:00",
-    "sla_s": 565.0
+    "last_seen": "2026-08-22T11:58:10+00:00",
+    "remediation_started_at": "2026-08-22T11:58:10+00:00",
+    "remediated_at": "2026-08-22T12:00:46+00:00",
+    "sla_s": 2477.0,
+    "regressed_at": "2026-08-22T11:58:10+00:00"
   },
   "AWS-SG-DB-PORTS-OPEN:aws:sg-0ec1c79b88debbbad": {
     "rule_id": "AWS-SG-DB-PORTS-OPEN",
@@ -85,10 +86,11 @@
     "status": "REMEDIATED",
     "fingerprint": "AWS-SG-DB-PORTS-OPEN:aws:sg-0ec1c79b88debbbad",
     "first_seen": "2026-08-22T11:19:29+00:00",
-    "last_seen": "2026-08-22T11:26:24+00:00",
-    "remediation_started_at": "2026-08-22T11:26:24+00:00",
-    "remediated_at": "2026-08-22T11:28:54+00:00",
-    "sla_s": 565.0
+    "last_seen": "2026-08-22T11:58:10+00:00",
+    "remediation_started_at": "2026-08-22T11:58:10+00:00",
+    "remediated_at": "2026-08-22T12:00:46+00:00",
+    "sla_s": 2477.0,
+    "regressed_at": "2026-08-22T11:58:10+00:00"
   },
   "AWS-S3-PUBLIC-READ:aws:cg-demo-public-e85f7ae8": {
     "rule_id": "AWS-S3-PUBLIC-READ",
@@ -105,10 +107,11 @@
     "status": "REMEDIATED",
     "fingerprint": "AWS-S3-PUBLIC-READ:aws:cg-demo-public-e85f7ae8",
     "first_seen": "2026-08-22T11:19:29+00:00",
-    "last_seen": "2026-08-22T11:26:24+00:00",
-    "remediation_started_at": "2026-08-22T11:26:24+00:00",
-    "remediated_at": "2026-08-22T11:28:54+00:00",
-    "sla_s": 565.0
+    "last_seen": "2026-08-22T11:58:10+00:00",
+    "remediation_started_at": "2026-08-22T11:58:10+00:00",
+    "remediated_at": "2026-08-22T12:00:46+00:00",
+    "sla_s": 2477.0,
+    "regressed_at": "2026-08-22T11:58:10+00:00"
   },
   "AWS-RDS-PUBLIC:aws:cg-demo-public-db": {
     "rule_id": "AWS-RDS-PUBLIC",
@@ -125,9 +128,10 @@
     "status": "REMEDIATED",
     "fingerprint": "AWS-RDS-PUBLIC:aws:cg-demo-public-db",
     "first_seen": "2026-08-22T11:20:16+00:00",
-    "last_seen": "2026-08-22T11:26:24+00:00",
-    "remediation_started_at": "2026-08-22T11:26:24+00:00",
-    "remediated_at": "2026-08-22T11:28:54+00:00",
-    "sla_s": 518.0
+    "last_seen": "2026-08-22T11:58:10+00:00",
+    "remediation_started_at": "2026-08-22T11:58:10+00:00",
+    "remediated_at": "2026-08-22T12:00:46+00:00",
+    "sla_s": 2430.0,
+    "regressed_at": "2026-08-22T11:58:10+00:00"
   }
 }
