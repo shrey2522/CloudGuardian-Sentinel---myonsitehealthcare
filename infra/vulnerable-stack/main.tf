@@ -92,23 +92,23 @@ resource "aws_db_subnet_group" "demo" {
 }
 
 resource "aws_db_instance" "public_db" {
-  identifier             = "cg-demo-public-db"
-  engine                 = "mysql"
-  instance_class         = var.db_instance_class
-  allocated_storage      = 20
-  storage_type           = "gp2"
-  storage_encrypted      = false
-  db_name                = "demodb"
-  username               = "sentinel"
-  password               = var.db_password
-  publicly_accessible    = var.db_publicly_accessible
-  db_subnet_group_name   = aws_db_subnet_group.demo.name
-  vpc_security_group_ids = [aws_security_group.open_sg.id]
-  multi_az               = false
+  identifier              = "cg-demo-public-db"
+  engine                  = "mysql"
+  instance_class          = var.db_instance_class
+  allocated_storage       = 20
+  storage_type            = "gp2"
+  storage_encrypted       = false
+  db_name                 = "demodb"
+  username                = "sentinel"
+  password                = var.db_password
+  publicly_accessible     = var.db_publicly_accessible
+  db_subnet_group_name    = aws_db_subnet_group.demo.name
+  vpc_security_group_ids  = [aws_security_group.open_sg.id]
+  multi_az                = false
   backup_retention_period = 0
-  skip_final_snapshot    = true
-  apply_immediately      = true
-  tags                   = local.tags
+  skip_final_snapshot     = true
+  apply_immediately       = true
+  tags                    = local.tags
 }
 
 # --- MISCONFIG 3: S3 bucket, encryption gated by variable --------------------
@@ -143,8 +143,8 @@ resource "aws_s3_bucket_public_access_block" "public_off" {
 }
 
 resource "aws_s3_bucket_policy" "public_read" {
-  count  = var.s3_public ? 1 : 0
-  bucket = aws_s3_bucket.public.id
+  count      = var.s3_public ? 1 : 0
+  bucket     = aws_s3_bucket.public.id
   depends_on = [aws_s3_bucket_public_access_block.public_off]
 
   policy = jsonencode({
