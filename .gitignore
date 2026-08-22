@@ -1,0 +1,25 @@
+# --- secrets (NEVER commit) ---
+secrets/
+gcp-key.json
+*.pem
+*.tfvars
+
+# --- terraform ---
+.terraform/
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+*.tfplan
+crash.log
+
+# --- python ---
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# --- misc ---
+.DS_Store
+Thumbs.db
+*.log
